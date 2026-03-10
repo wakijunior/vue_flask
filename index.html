@@ -9,9 +9,47 @@
       integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
       crossorigin="anonymous"
     />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.3/css/bootstrap.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.datatables.net/2.3.5/css/dataTables.bootstrap5.css"
+    />
     <title>Document</title>
   </head>
   <body>
+    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+      <div class="container-fluid" style="margin-left: 100px">
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarSupportedContent"
+          aria-controls="navbarSupportedContent"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+              <a class="nav-link active" aria-current="page" href="#"
+                >Register</a
+              >
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">Login</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">Users</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
     <div class="container" id="app">
       <form id="form" name="form" @submit.prevent="registerUser">
         <div class="mb-3">
@@ -36,6 +74,30 @@
 
         <button type="submit" class="btn btn-primary">Submit</button>
       </form>
+
+      <br />
+      <br />
+      <hr />
+      <br />
+      <h2>List of Users</h2>
+      <br />
+
+      <table id="example" class="table table-striped">
+        <thead>
+          <tr>
+            <th scope="col">ID</th>
+            <th scope="col">Name</th>
+            <th scope="col">Location</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">1</th>
+            <td>Mark</td>
+            <td>Thika</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
 
     <script
@@ -57,28 +119,48 @@
       referrerpolicy="no-referrer"
     ></script>
 
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.js"
+      integrity="sha512-OKuL2kpi8zfeXcqSXnGbL6tKc9JxWmppJY4mOSn1EsngRb7fx1N5+7wOTGqu2bI5OAYL3Og7/Beg7EsWG2OBKA=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.datatables.net/2.3.5/js/dataTables.js"></script>
+    <script src="https://cdn.datatables.net/2.3.5/js/dataTables.bootstrap5.js"></script>
+    <script>
+      $(document).ready(function () {
+        $("#example").DataTable();
+      });
+    </script>
+
     <script>
       new Vue({
-          el : "#app",
-          data : {
-            name : "",
-            location : "",
+        el: "#app",
+        data: {
+          name: "",
+          location: "",
+        },
+        methods: {
+          registerUser() {
+            if (this.name === "" || this.location === "") {
+              alert("Please fill in all fields");
+            } else {
+              axios
+                .post("http://localhost:5000/users", {
+                  name: this.name,
+                  location: this.location,
+                })
+                .then((response) => {
+                  console.log(response.data);
+                })
+                .catch((error) => {
+                  console.error("Error registering user:", error);
+                });
+            }
           },
-          methods: {
-            registerUser(){
-                if(this.name === "" || this.location === ""){
-                    alert("Please fill in all fields");
-                }
-                else {
-                     response = axios.post("http://localhost:5000/users", {
-                        name: this.name,
-                        location: this.location,
-            });
-            console.log(response);
-        }
-          },
-      },
-    });
+        },
+      });
     </script>
   </body>
 </html>
