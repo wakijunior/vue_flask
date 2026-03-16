@@ -17,6 +17,13 @@
       rel="stylesheet"
       href="https://cdn.datatables.net/2.3.5/css/dataTables.bootstrap5.css"
     />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
+      integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
     <title>Document</title>
   </head>
   <body>
@@ -62,6 +69,16 @@
             aria-describedby="emailHelp"
           />
         </div>
+
+        <div class="mb-3">
+          <label for="location" class="form-label">Age</label>
+          <input
+            type="text"
+            class="form-control"
+            id="age"
+            v-model="age"
+          />
+        </div>
         <div class="mb-3">
           <label for="location" class="form-label">Location</label>
           <input
@@ -73,28 +90,37 @@
         </div>
 
         <button type="submit" class="btn btn-primary">Submit</button>
+        <i v-if="loader" class="fa-duotone fa-solid fa-spinner"></i>
       </form>
 
-      <br />
-      <br />
+      <div class="alert alert-success" v-if="alertSuccessShow" role="alert">
+        {{ alertMessage }}
+      </div>
+      <div class="alert alert-danger" v-if="alertErrorShow" role="alert">
+        {{ alertMessage }}
+      </div>
+
       <hr />
-      <br />
-      <h2>List of Users</h2>
-      <br />
+
+      <div class="mt-3">
+        <h2>List of Users</h2>
+      </div>
 
       <table id="example" class="table table-striped">
         <thead>
           <tr>
             <th scope="col">ID</th>
             <th scope="col">Name</th>
+            <th scope="col">Age</th>
             <th scope="col">Location</th>
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <th scope="row">1</th>
-            <td>Mark</td>
-            <td>Thika</td>
+          <tr v-for="user in users" :key="user.id">
+            <th scope="row">{{ user.id }}</th>
+            <td>{{ user.name }}</td>
+            <td>{{ user.age }}</td>
+            <td>{{ user.location }}</td>
           </tr>
         </tbody>
       </table>
@@ -128,11 +154,11 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.datatables.net/2.3.5/js/dataTables.js"></script>
     <script src="https://cdn.datatables.net/2.3.5/js/dataTables.bootstrap5.js"></script>
-    <script>
+    <!-- <script>
       $(document).ready(function () {
         $("#example").DataTable();
       });
-    </script>
+    </script> -->
 
     <script>
       new Vue({
@@ -140,26 +166,100 @@
         data: {
           name: "",
           location: "",
+          age: "",
+          alertSuccessShow: false,
+          alertErrorShow: false,
+          alertMessage: "",
+          loader: false,
+          users : [],
         },
         methods: {
           registerUser() {
             if (this.name === "" || this.location === "") {
-              alert("Please fill in all fields");
+              this.loader = true;
+              this.alertErrorShow = true;
+              this.loader = false;
+              this.alertMessage = "Enter your name and location!";
+
+              //clear the form fields after successful registration
+              this.name = "";
+              this.location = "";
+              this.age = "";
+
+              setTimeout(() => {
+                  location.reload();
+                }, 3000);
+
+              //refreshes the page with the new user
+              this.getUsers()
+
+              // Auto-hide success after 3 seconds
+              setTimeout(() => {
+                this.alertSuccessShow = false;
+              }, 3000);
+
             } else {
+              this.loader = true;
               axios
                 .post("http://localhost:5000/users", {
                   name: this.name,
                   location: this.location,
+                  age: this.age
                 })
                 .then((response) => {
+                  this.loader = false;
                   console.log(response.data);
+                  this.alertErrorShow = false;
+                  this.alertSuccessShow = true;
+                  this.alertMessage = "User registered successfully";
+
+                  // Clear the form fields after successful registration
+                  this.name = "";
+                  this.location = "";
+                  this.age = "";
+
+                  // Auto-hide success message after 5 seconds
+                  setTimeout(() => {
+                    this.alertSuccessShow = false;
+                  }, 5000);
                 })
                 .catch((error) => {
+                  this.loader = false;
                   console.error("Error registering user:", error);
+                  this.alertSuccessShow = false;
+                  this.alertErrorShow = true;
+
+                  this.alertMessage = error;
+
+                  // Auto-hide error after 5 seconds
+                  setTimeout(() => {
+                    this.alertErrorShow = false;
+                  }, 5000);
                 });
             }
           },
+          getUsers(){
+            axios.get("http://localhost:5000/users")
+            .then((response) => {
+              console.log(response.data.data)
+              this.users = response.data.data;
+              this.$nextTick(() => {
+                  $("#example").DataTable({
+                    // Optional: Add this to handle empty/null data gracefully
+                    columnDefs: [{ defaultContent: "-", targets: "_all" }],
+                  });
+                });
+            })
+            .catch((error) => {
+              this.alertErrorShow = true;
+              this.alertSuccessShow = false;
+              this.alertMessage = "Something Went Wrong"
+            })
+          }
         },
+        mounted(){
+          this.getUsers()
+        }
       });
     </script>
   </body>
