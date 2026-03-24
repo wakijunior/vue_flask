@@ -51,14 +51,14 @@
               <a class="nav-link" href="#">Login</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="#">Users</a>
+              <a class="nav-link" href="#">Employees</a>
             </li>
           </ul>
         </div>
       </div>
     </nav>
     <div class="container" id="app">
-      <form id="form" name="form" @submit.prevent="registerUser">
+      <form id="form" name="form" @submit.prevent="registerEmployee">
         <div class="mb-3">
           <label for="name" class="form-label">Name</label>
           <input
@@ -103,7 +103,7 @@
       <hr />
 
       <div class="mt-3">
-        <h2>List of Users</h2>
+        <h2>List of Employees</h2>
       </div>
 
       <table id="example" class="table table-striped">
@@ -116,11 +116,11 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="user in users" :key="user.id">
-            <th scope="row">{{ user.id }}</th>
-            <td>{{ user.name }}</td>
-            <td>{{ user.age }}</td>
-            <td>{{ user.location }}</td>
+          <tr v-for="employee in employees" :key="employee.id">
+            <th scope="row">{{ employee.id }}</th>
+            <td>{{ employee.name }}</td>
+            <td>{{ employee.age }}</td>
+            <td>{{ employee.location }}</td>
           </tr>
         </tbody>
       </table>
@@ -171,10 +171,10 @@
           alertErrorShow: false,
           alertMessage: "",
           loader: false,
-          users : [],
+          employees : [],
         },
         methods: {
-          registerUser() {
+          registerEmployee() {
             if (this.name === "" || this.location === "") {
               this.loader = true;
               this.alertErrorShow = true;
@@ -190,8 +190,8 @@
                   location.reload();
                 }, 3000);
 
-              //refreshes the page with the new user
-              this.getUsers()
+              //refreshes the page with the new employee
+              this.getEmployees()
 
               // Auto-hide success after 3 seconds
               setTimeout(() => {
@@ -201,7 +201,7 @@
             } else {
               this.loader = true;
               axios
-                .post("http://localhost:5000/users", {
+                .post("http://localhost:5000/employees", {
                   name: this.name,
                   location: this.location,
                   age: this.age
@@ -211,7 +211,7 @@
                   console.log(response.data);
                   this.alertErrorShow = false;
                   this.alertSuccessShow = true;
-                  this.alertMessage = "User registered successfully";
+                  this.alertMessage = "Employee registered successfully";
 
                   // Clear the form fields after successful registration
                   this.name = "";
@@ -225,7 +225,7 @@
                 })
                 .catch((error) => {
                   this.loader = false;
-                  console.error("Error registering user:", error);
+                  console.error("Error registering employee:", error);
                   this.alertSuccessShow = false;
                   this.alertErrorShow = true;
 
@@ -238,11 +238,11 @@
                 });
             }
           },
-          getUsers(){
-            axios.get("http://localhost:5000/users")
+          getEmployees(){
+            axios.get("http://localhost:5000/employees")
             .then((response) => {
               console.log(response.data.data)
-              this.users = response.data.data;
+              this.employees = response.data.data;
               this.$nextTick(() => {
                   $("#example").DataTable({
                     // Optional: Add this to handle empty/null data gracefully
@@ -258,7 +258,7 @@
           }
         },
         mounted(){
-          this.getUsers()
+          this.getEmployees()
         }
       });
     </script>
